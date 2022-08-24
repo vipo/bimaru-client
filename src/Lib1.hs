@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module Lib1(
-    State, emptyState, gameStart, render
+    State, emptyState, gameStart, render, mkCheck
 ) where
 
 import Types
@@ -26,4 +26,9 @@ gameStart d (State l) = State $ ("Game started: " ++ show d) : l
 -- IMPLEMENT
 -- renders your game board
 render :: State -> String
-render s = show s
+render = show
+
+-- IMPLEMENT
+-- Make check from current state
+mkCheck :: State -> Check
+mkCheck _ = Check []

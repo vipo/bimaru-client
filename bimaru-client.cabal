@@ -41,6 +41,7 @@ library
     , process
     , repline
     , scientific
+    , string-conversions
     , text
     , transformers
     , unordered-containers
@@ -66,6 +67,7 @@ executable bimaru-client-1
     , process
     , repline
     , scientific
+    , string-conversions
     , text
     , transformers
     , unordered-containers

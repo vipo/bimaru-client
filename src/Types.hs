@@ -1,5 +1,6 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Types (
-    Document(..)
+    Document(..), Check(..)
 ) where
 import Data.Yaml as Y
 import Data.HashMap.Strict as HMS
@@ -7,7 +8,22 @@ import Data.Text as T
 import Data.List as L ((++), map)
 import qualified Data.Vector as V
 import Data.Scientific as S
+import GHC.Generics
 
+-- Data structure used to post ship allocations
+-- to game server (for check). Do not modify.
+newtype Check = Check {
+    coords :: [Coord]
+} deriving (Generic, Show, Eq)
+instance ToJSON Check
+
+-- Data structure used to post ship allocations
+-- to game server (for check). Do not modify.
+data Coord = Coord {
+    col :: Int,
+    row :: Int
+} deriving (Generic, Show, Eq)
+instance ToJSON Coord
 
 -- Document represents a document which is used to
 -- communicate with a game server

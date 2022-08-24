@@ -29,6 +29,7 @@ dependencies:
 - bytestring
 - lens
 - scientific
+- string-conversions
 - text
 - transformers
 - wreq

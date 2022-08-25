@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use tuple-section" #-}
 
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Class(lift)
@@ -10,10 +12,11 @@ import qualified Data.List as L
 import Data.Text as T
 import Data.Text.Encoding.Base64 (decodeBase64)
 import Data.Text.IO as TIO
+import Data.List.Split as S
 import Data.Yaml as Y
 import Data.Char (isSpace)
 import Lib1
-import Types(Check)
+import Types(Check, Row(..), Col(..))
 import Network.Wreq hiding (get, put)
 import Control.Lens
 import System.Console.Repline
@@ -36,12 +39,37 @@ type Repl a = HaskelineT (StateT (String, Lib1.State) IO) a
 cmd :: String -> Repl ()
 cmd c
   | trim c == "show" = lift get >>= liftIO . Prelude.putStrLn . Lib1.render . snd
-  | trim c == "check" = lift get >>= (pure . Lib1.mkCheck . snd) >>= check >>= liftIO . Prelude.putStrLn
+  | trim c == "check" = lift get >>= check . (Lib1.mkCheck . snd) >>= liftIO . Prelude.putStrLn
+  | "toggle" `L.isPrefixOf` trim c = do
+    let tokens = L.filter (not . Prelude.null) $ S.splitOn " " c
+    case tokens of
+      ["toggle", colrow] ->
+        case parseColRow colrow of
+          Nothing -> liftIO $ Prelude.putStrLn $ "Illegal toggle argument: " ++ colrow
+          Just(col, row) -> lift $ modify (\(u, s) -> (u, Lib1.toggle s col row))
+      _ -> liftIO $ Prelude.putStrLn $ "Illegal format, \"toggle $column$row\" expected, e.g \"toggle A10\"  " ++ c
 cmd c = liftIO $ Prelude.putStrLn $ "Unknown command: " ++ c
 
 trim :: String -> String
 trim = f . f
   where f = L.reverse . L.dropWhile isSpace
+
+parseColRow :: String -> Maybe (Types.Col, Types.Row)
+parseColRow [c, '1', '0'] = fmap (\col -> (col, Row10)) (parseCol c)
+parseColRow [c, r] = (,) <$> parseCol c <*> parseRow r
+parseColRow _ = Nothing
+
+parseCol :: Char -> Maybe Types.Col
+parseCol c =
+  case c `L.elemIndices` ['A'..'J'] of
+    [i] -> Just $ [(minBound :: Types.Col) ..] !! i
+    _ -> Nothing
+
+parseRow :: Char -> Maybe Types.Row
+parseRow r =
+  case r `L.elemIndices` ['1'..'9'] of
+    [i] -> Just $ [(minBound :: Types.Row) ..] !! i
+    _ -> Nothing
 
 check :: Check -> Repl String
 check c = do

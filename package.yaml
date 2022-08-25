@@ -30,6 +30,7 @@ dependencies:
 - lens
 - scientific
 - string-conversions
+- split
 - text
 - transformers
 - wreq

@@ -41,6 +41,7 @@ library
     , process
     , repline
     , scientific
+    , split
     , string-conversions
     , text
     , transformers
@@ -67,6 +68,7 @@ executable bimaru-client-1
     , process
     , repline
     , scientific
+    , split
     , string-conversions
     , text
     , transformers

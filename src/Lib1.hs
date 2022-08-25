@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module Lib1(
-    State, emptyState, gameStart, render, mkCheck
+    State, emptyState, gameStart, render, mkCheck, toggle
 ) where
 
 import Types
@@ -32,3 +32,8 @@ render = show
 -- Make check from current state
 mkCheck :: State -> Check
 mkCheck _ = Check []
+
+-- IMPLEMENT
+-- Toggle state's value
+toggle :: State -> Col -> Row -> State
+toggle (State l) c r = State $ ("Toggle " ++ show c ++ show r) : l

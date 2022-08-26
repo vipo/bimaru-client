@@ -1,5 +1,7 @@
 # bimaru-client
 
+We will solve [bimaru](https://en.wikipedia.org/wiki/Battleship_(puzzle)) puzzles!
+
 Steps:
 1. Clone this repository (in the future you will have to merge this repo into your repo multiple times)
 2. Install [GHCup](https://www.haskell.org/ghcup/)

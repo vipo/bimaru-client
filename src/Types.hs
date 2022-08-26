@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Types (
-    Document(..), Check(..), Col(..), Row(..)
+    Document(..), Check(..)
 ) where
 import Data.Yaml as Y
 import Data.HashMap.Strict as HMS
@@ -23,9 +23,6 @@ data Coord = Coord {
     row :: Int
 } deriving (Generic, Show, Eq)
 instance ToJSON Coord
-
-data Col = ColA | ColB | ColC | ColD | ColE | ColF | ColG | ColH | ColI | ColJ deriving (Eq, Show, Bounded, Enum)
-data Row = Row1 | Row2 | Row3 | Row4 | Row5 | Row6 | Row7 | Row8 | Row9 | Row10 deriving (Eq, Show, Bounded, Enum)
 
 -- Document represents a document which is used to
 -- communicate with a game server

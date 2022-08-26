@@ -16,7 +16,7 @@ import Data.List.Split as S
 import Data.Yaml as Y
 import Data.Char (isSpace)
 import Lib1
-import Types(Check, Row(..), Col(..))
+import Types(Check)
 import Network.Wreq hiding (get, put)
 import qualified Network.Wreq as Wreq
 
@@ -25,21 +25,27 @@ import System.Console.Repline
   ( CompleterStyle (Word),
     ExitDecision (Exit),
     HaskelineT,
-    Options,
     WordCompleter,
     evalRepl,
   )
 import System.Environment (getArgs)
-import System.Exit (exitFailure, exitSuccess)
+import System.Exit (exitFailure)
 import System.IO (stderr)
 
 import Data.String.Conversions
 
 type Repl a = HaskelineT (StateT (String, Lib1.State) IO) a
 
+commandShow :: String
 commandShow = "show"
+
+commandHint :: String
 commandHint = "hint"
+
+commandCheck :: String
 commandCheck = "check"
+
+commandToggle :: String
 commandToggle = "toggle"
 
 -- Evaluation : handle each line user inputs
@@ -49,18 +55,15 @@ cmd c
   | trim c == commandCheck = lift get >>= check . (Lib1.mkCheck . snd) >>= liftIO . Prelude.putStrLn
   | commandToggle `L.isPrefixOf` trim c = do
     case tokens c of
-      [_, colrow] ->
-        case parseColRow colrow of
-          Nothing -> liftIO $ Prelude.putStrLn $ "Illegal " ++ commandToggle ++ " argument: " ++ colrow
-          Just(col, row) -> lift $ modify (\(u, s) -> (u, Lib1.toggle s col row))
-      _ -> liftIO $ Prelude.putStrLn $ "Illegal format, \"" ++ commandToggle ++ " $column$row\" expected, e.g \"" ++ commandToggle ++ " A10\"  " ++ c
+      [_] -> liftIO $ Prelude.putStrLn $ "Illegal format, \"" ++ commandToggle ++ " expects at leas one argument"
+      t -> lift $ modify (\(u, s) -> (u, Lib1.toggle s (L.drop 1 t)))
   | commandHint `L.isPrefixOf` trim c =
     case tokens c of
-      [_, count] ->
-        case reads count of
+      [_, str] ->
+        case reads str of
           [(n, "")] -> hints n
-          _ -> liftIO $ Prelude.putStrLn $ "Illegal " ++ commandHint ++ " argument: " ++ count
-      _ -> liftIO $ Prelude.putStrLn $ "Illegal format, \"" ++ commandHint ++ " $number_of_hints\" expected, e.g \"" ++ commandHint ++ " 1\"  " ++ c
+          _ -> liftIO $ Prelude.putStrLn $ "Illegal " ++ commandHint ++ " argument: " ++ str
+      _ -> liftIO $ Prelude.putStrLn $ "Illegal format, \"" ++ commandHint ++ " $number_of_hints\" expected, e.g \"" ++ commandHint ++ " 1\""
 cmd c = liftIO $ Prelude.putStrLn $ "Unknown command: " ++ c
 
 tokens :: String -> [String]
@@ -69,23 +72,6 @@ tokens s = L.filter (not . Prelude.null) $ S.splitOn " " s
 trim :: String -> String
 trim = f . f
   where f = L.reverse . L.dropWhile isSpace
-
-parseColRow :: String -> Maybe (Types.Col, Types.Row)
-parseColRow [c, '1', '0'] = fmap (\col -> (col, Row10)) (parseCol c)
-parseColRow [c, r] = (,) <$> parseCol c <*> parseRow r
-parseColRow _ = Nothing
-
-parseCol :: Char -> Maybe Types.Col
-parseCol c =
-  case c `L.elemIndices` ['A'..'J'] of
-    [i] -> Just $ [(minBound :: Types.Col) ..] !! i
-    _ -> Nothing
-
-parseRow :: Char -> Maybe Types.Row
-parseRow r =
-  case r `L.elemIndices` ['1'..'9'] of
-    [i] -> Just $ [(minBound :: Types.Row) ..] !! i
-    _ -> Nothing
 
 check :: Check -> Repl String
 check c = do

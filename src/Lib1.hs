@@ -35,8 +35,9 @@ mkCheck _ = Check []
 
 -- IMPLEMENT
 -- Toggle state's value
-toggle :: State -> Col -> Row -> State
-toggle (State l) c r = State $ ("Toggle " ++ show c ++ show r) : l
+-- Receive raw user input tokens
+toggle :: State -> [String] -> State
+toggle (State l) t = State $ ("Toggle " ++ show t) : l
 
 -- IMPLEMENT
 -- Adds hint data to the game state

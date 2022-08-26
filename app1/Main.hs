@@ -18,6 +18,8 @@ import Data.Char (isSpace)
 import Lib1
 import Types(Check, Row(..), Col(..))
 import Network.Wreq hiding (get, put)
+import qualified Network.Wreq as Wreq
+
 import Control.Lens
 import System.Console.Repline
   ( CompleterStyle (Word),
@@ -35,20 +37,34 @@ import Data.String.Conversions
 
 type Repl a = HaskelineT (StateT (String, Lib1.State) IO) a
 
+commandShow = "show"
+commandHint = "hint"
+commandCheck = "check"
+commandToggle = "toggle"
+
 -- Evaluation : handle each line user inputs
 cmd :: String -> Repl ()
 cmd c
-  | trim c == "show" = lift get >>= liftIO . Prelude.putStrLn . Lib1.render . snd
-  | trim c == "check" = lift get >>= check . (Lib1.mkCheck . snd) >>= liftIO . Prelude.putStrLn
-  | "toggle" `L.isPrefixOf` trim c = do
-    let tokens = L.filter (not . Prelude.null) $ S.splitOn " " c
-    case tokens of
-      ["toggle", colrow] ->
+  | trim c == commandShow = lift get >>= liftIO . Prelude.putStrLn . Lib1.render . snd
+  | trim c == commandCheck = lift get >>= check . (Lib1.mkCheck . snd) >>= liftIO . Prelude.putStrLn
+  | commandToggle `L.isPrefixOf` trim c = do
+    case tokens c of
+      [_, colrow] ->
         case parseColRow colrow of
-          Nothing -> liftIO $ Prelude.putStrLn $ "Illegal toggle argument: " ++ colrow
+          Nothing -> liftIO $ Prelude.putStrLn $ "Illegal " ++ commandToggle ++ " argument: " ++ colrow
           Just(col, row) -> lift $ modify (\(u, s) -> (u, Lib1.toggle s col row))
-      _ -> liftIO $ Prelude.putStrLn $ "Illegal format, \"toggle $column$row\" expected, e.g \"toggle A10\"  " ++ c
+      _ -> liftIO $ Prelude.putStrLn $ "Illegal format, \"" ++ commandToggle ++ " $column$row\" expected, e.g \"" ++ commandToggle ++ " A10\"  " ++ c
+  | commandHint `L.isPrefixOf` trim c =
+    case tokens c of
+      [_, count] ->
+        case reads count of
+          [(n, "")] -> hints n
+          _ -> liftIO $ Prelude.putStrLn $ "Illegal " ++ commandHint ++ " argument: " ++ count
+      _ -> liftIO $ Prelude.putStrLn $ "Illegal format, \"" ++ commandHint ++ " $number_of_hints\" expected, e.g \"" ++ commandHint ++ " 1\"  " ++ c
 cmd c = liftIO $ Prelude.putStrLn $ "Unknown command: " ++ c
+
+tokens :: String -> [String]
+tokens s = L.filter (not . Prelude.null) $ S.splitOn " " s
 
 trim :: String -> String
 trim = f . f
@@ -79,10 +95,17 @@ check c = do
   resp <- liftIO $ postWith opts (url ++ "/check") body
   pure $ cs $ resp ^. responseBody
 
+hints :: Int -> Repl ()
+hints n = do
+  (url, s) <- lift get
+  r <- liftIO $ Wreq.get (url ++ "/hint?limit=" ++ show n)
+  d <- liftIO $ Y.decodeThrow $ BSL.toStrict $ r ^. responseBody
+  lift $ put (url, Lib1.hint s d)
+
 -- Tab Completion: return a completion for partial words entered
 completer :: Monad m => WordCompleter m
 completer n = do
-  let names = ["show", "hint", "check", "toggle"]
+  let names = [commandShow, commandHint, commandCheck, commandToggle]
   return $ Prelude.filter (L.isPrefixOf n) names
 
 ini :: Repl ()
@@ -90,7 +113,7 @@ ini = do
   (url, s) <- lift get
   r <- liftIO $ post url B.empty
   d <- liftIO $ Y.decodeThrow $ BSL.toStrict $ r ^. responseBody
-  lift $ put (url, Lib1.gameStart d s)
+  lift $ put (url, Lib1.gameStart s d)
   liftIO $ TIO.putStrLn "Welcome to Bimaru. Press [TAB] for available commands list"
 
 final :: Repl ExitDecision

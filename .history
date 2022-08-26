@@ -1,4 +1,9 @@
 show
+hint 2
+show
+toggle A1
+show
+show
 toggle B1
 toggle A10
 show

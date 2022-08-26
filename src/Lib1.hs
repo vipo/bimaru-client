@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module Lib1(
-    State, emptyState, gameStart, render, mkCheck, toggle
+    State, emptyState, gameStart, render, mkCheck, toggle, hint
 ) where
 
 import Types
@@ -9,7 +9,7 @@ import Types
 -- It must contain all values you might need during a game:
 -- number of occupied rows/cols, hints, occupied cells,..
 -- You can change the right hand side as you wish but please
--- keep the name
+-- keep the type name as is
 data State = State [String]
     deriving Show
 
@@ -20,8 +20,8 @@ emptyState = State ["Initial state"]
 
 -- IMPLEMENT
 -- This adds game data to initial state 
-gameStart :: Document -> State -> State
-gameStart d (State l) = State $ ("Game started: " ++ show d) : l
+gameStart :: State -> Document -> State
+gameStart (State l) d = State $ ("Game started: " ++ show d) : l
 
 -- IMPLEMENT
 -- renders your game board
@@ -37,3 +37,8 @@ mkCheck _ = Check []
 -- Toggle state's value
 toggle :: State -> Col -> Row -> State
 toggle (State l) c r = State $ ("Toggle " ++ show c ++ show r) : l
+
+-- IMPLEMENT
+-- Adds hint data to the game state
+hint :: State -> Document -> State
+hint (State l) h = State $ ("Hint " ++ show h) : l

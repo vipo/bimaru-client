@@ -12,3 +12,8 @@ Steps:
 4. (Optional) Install VSCode with Haskell plugin
 5. Run `stack build` to see if everything works
 6. Run `stack run -- $YOUR_TOKEN` play a game
+
+Some other notes:
+- On Windows you might need to install "Msys2"
+- On Linux you might need to install "libtinfo-dev"
+- On Linux you might need to use `stack` with version suffix, e.g. `stack-2.7.5`. 

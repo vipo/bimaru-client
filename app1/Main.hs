@@ -1,23 +1,24 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Use tuple-section" #-}
 
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Class(lift)
 import Control.Monad.Trans.State.Strict
-import Data.ByteString as B
-import Data.ByteString.Lazy as BSL
+    ( evalStateT, get, modify, put, StateT )
+import Data.ByteString as B ( empty )
+import Data.ByteString.Lazy as BSL ( toStrict )
 import Data.Either as E (fromRight)
 import qualified Data.List as L
-import Data.Text as T
+import Data.Text as T ( concat, drop, pack, unpack, Text )
 import Data.Text.Encoding.Base64 (decodeBase64)
-import Data.Text.IO as TIO
-import Data.List.Split as S
-import Data.Yaml as Y
+import Data.Text.IO as TIO ( hPutStrLn, putStrLn )
+import Data.List.Split as S ( splitOn )
+import Data.Yaml as Y ( decodeThrow, encode )
 import Data.Char (isSpace)
 import Lib1
+    ( emptyState, gameStart, hint, mkCheck, render, toggle, State )
 import Types(Check)
-import Network.Wreq hiding (get, put)
+import Network.Wreq
+    ( post, postWith, defaults, header, responseBody )
 import qualified Network.Wreq as Wreq
 
 import Control.Lens

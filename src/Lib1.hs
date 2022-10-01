@@ -10,21 +10,24 @@ import Types
 -- number of occupied rows/cols, hints, occupied cells,..
 -- You can change the right hand side as you wish but please
 -- keep the type name as is
-data State = State [String]
-    deriving Show
+data State =
+  List [State] |
+  Hints Int    |
+  Cols [Int]   | 
+  Rows [Int]
+  deriving (Show, Eq)
 
 -- IMPLEMENT
 -- This is very initial state of your program
 emptyState :: State
-emptyState = State ["Initial state"]
+emptyState  = List []
 
 -- IMPLEMENT
 -- This adds game data to initial state 
 gameStart :: State -> Document -> State
-gameStart (State l) d = State $ ("Game started: " ++ show d) : l
+gameStart state doc = parser doc [state]
 
--- IMPLEMENT
--- renders your game board
+
 render :: State -> String
 render = show
 
@@ -37,9 +40,28 @@ mkCheck _ = Check []
 -- Toggle state's value
 -- Receive raw user input tokens
 toggle :: State -> [String] -> State
-toggle (State l) t = State $ ("Toggle " ++ show t) : l
+toggle l t = emptyState
 
 -- IMPLEMENT
 -- Adds hint data to the game state
 hint :: State -> Document -> State
-hint (State l) h = State $ ("Hint " ++ show h) : l
+hint l h = emptyState
+
+parser :: Document -> [State] -> State
+parser (DMap((a, b):t)) state = 
+    case a of 
+    "number_of_hints" -> parser (DMap t) (Hints   (parserDInteger b):state)
+    "occupied_cols" -> parser (DMap t) (Cols   (colTran b []):state)
+    "occupied_rows" -> parser (DMap t) (Rows   (colTran b []):state)
+    _ -> List state
+parser doc st = List st 
+
+
+colTran :: Document -> [Int] -> [Int]
+colTran (DList (skaicius :t)) listas= colTran (DList t) (parserDInteger skaicius:listas) 
+colTran nulis listas = listas
+
+
+parserDInteger :: Document -> Int
+parserDInteger (DInteger a) = a
+parserDInteger a = error "its not DInteger"

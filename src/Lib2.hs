@@ -2,13 +2,11 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Lib2(renderDocument, hint, gameStart) where
 
-import Types
+import Types ( ToDocument(..), Document, Check )
 import Lib1 (State(..))
-import Types (Document(..))
 
 -- IMPLEMENT
 -- First, make Check an instance of ToDocument class
-
 
 -- IMPLEMENT
 -- Renders document to yaml

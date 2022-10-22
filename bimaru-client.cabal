@@ -27,6 +27,7 @@ library
   exposed-modules:
       Lib1
       Lib2
+      Lib3
       Types
   other-modules:
       Paths_bimaru_client
@@ -85,6 +86,33 @@ executable bimaru-client-2
       Paths_bimaru_client
   hs-source-dirs:
       app2
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , base64
+    , bimaru-client
+    , bytestring
+    , lens
+    , process
+    , repline
+    , scientific
+    , split
+    , string-conversions
+    , text
+    , transformers
+    , unordered-containers
+    , vector
+    , wreq
+    , yaml
+  default-language: Haskell2010
+
+executable bimaru-client-3
+  main-is: Main.hs
+  other-modules:
+      Paths_bimaru_client
+  hs-source-dirs:
+      app3
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson

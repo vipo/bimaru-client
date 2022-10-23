@@ -2,13 +2,24 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Lib2 (renderDocument, gameStart, hint)
+import Lib3 (parseDocument)
 import Types (Document(..))
 
 main :: IO ()
 main = defaultMain (testGroup "Tests" [
   toYamlTests,
+  fromYamlTests,
   gameStartTests,
   hintTests])
+
+fromYamlTests :: TestTree
+fromYamlTests = testGroup "Document from yaml"
+  [   testCase "null" $
+        parseDocument "null" @?= Right DNull
+    -- IMPLEMENT more test cases:
+    -- * other primitive types/values
+    -- * nested types
+  ]
 
 toYamlTests :: TestTree
 toYamlTests = testGroup "Document to yaml"

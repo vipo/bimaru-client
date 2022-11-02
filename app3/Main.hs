@@ -105,7 +105,7 @@ ini = do
     Left msg -> liftIO $ fatal $ cs msg
     Right d -> do
       lift $ put (url, Lib3.gameStart s d)
-      liftIO $ TIO.putStrLn "Welcome to Bimaru v2. Press [TAB] for available commands list"
+      liftIO $ TIO.putStrLn "Welcome to Bimaru v3. Press [TAB] for available commands list"
 
 fatal :: Text -> IO ()
 fatal msg = do

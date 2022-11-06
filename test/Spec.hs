@@ -1,5 +1,8 @@
 import Test.Tasty
 import Test.Tasty.HUnit
+import Test.Tasty.QuickCheck
+import Data.String.Conversions
+import Data.Yaml as Y ( encode )
 
 import Lib2 (renderDocument, gameStart, hint)
 import Lib3 (parseDocument)
@@ -10,7 +13,25 @@ main = defaultMain (testGroup "Tests" [
   toYamlTests,
   fromYamlTests,
   gameStartTests,
-  hintTests])
+  hintTests,
+  properties])
+
+properties :: TestTree
+properties = testGroup "Properties" [golden, dogfood]
+
+golden :: TestTree
+golden = testGroup "Handles foreign rendering"
+  [
+    testProperty "parseDocument (Data.Yaml.encode doc) == doc" $
+      \doc -> parseDocument (cs (Y.encode doc)) == Right doc
+  ]
+
+dogfood :: TestTree
+dogfood = testGroup "Eating your own dogfood"
+  [  
+    testProperty "parseDocument (renderDocument doc) == doc" $
+      \doc -> parseDocument (renderDocument doc) == Right doc
+  ]
 
 fromYamlTests :: TestTree
 fromYamlTests = testGroup "Document from yaml"

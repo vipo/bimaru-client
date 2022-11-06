@@ -28,6 +28,7 @@ dependencies:
 - base64
 - bytestring
 - lens
+- QuickCheck
 - scientific
 - string-conversions
 - split
@@ -92,3 +93,4 @@ tests:
     - bimaru-client
     - tasty
     - tasty-hunit
+    - tasty-quickcheck

@@ -76,8 +76,19 @@ arbitraryDocument :: Gen Document
 arbitraryDocument = Gen.oneof [arbitraryDString, arbitraryDInteger, arbitraryDList, arbitraryDMap]
 
 arbitraryDString :: Gen Document
-arbitraryDString =
-    DString <$> listOf (chooseEnum ('\32', '\126'))
+arbitraryDString = do
+    s <- getSize
+    n <- choose (0, min 16 s)
+    DString <$> vectorOf n (oneof [arbitraryUpper, arbitraryLower, arbitraryDigit, return ' '])
+
+arbitraryUpper :: Gen Char
+arbitraryUpper = chooseEnum ('A', 'Z')
+
+arbitraryLower :: Gen Char
+arbitraryLower = chooseEnum ('a', 'z')
+
+arbitraryDigit :: Gen Char
+arbitraryDigit = chooseEnum ('0', '9')
 
 arbitraryDInteger :: Gen Document
 arbitraryDInteger = DInteger <$> arbitrary
@@ -94,7 +105,10 @@ arbitraryDMap = do
     n <- choose (0, min 4 s)
     DMap <$> vectorOf n ((,) <$> arbitraryK <*> arbitraryDocument)
     where
-        arbitraryK = listOf1 (chooseEnum ('\32', '\126'))
+        arbitraryK = do
+            s <- getSize
+            n <- choose (1, min 10 s)
+            vectorOf n (oneof [arbitraryUpper, arbitraryLower])
 
 class ToDocument a where
     toDocument :: a -> Document
